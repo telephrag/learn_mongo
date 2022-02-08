@@ -4,13 +4,13 @@ and then creating index over these documents that make use of said field like so
 ```   
 index := mongo.IndexModel{
     Keys:    bson.D{{"expire", 1}},
-	Options: options.Index().SetExpireAfterSeconds(0),
+    Options: options.Index().SetExpireAfterSeconds(0),
 }
 ```
 `db.col.getIndexes()` will display it as: 
 ```
 {
-	"v" : 2,
+"v" : 2,
 	"key" : {
 		"expire" : 1
 	},
