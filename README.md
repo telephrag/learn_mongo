@@ -18,6 +18,7 @@ index := mongo.IndexModel{
 	"expireAfterSeconds" : 0
 }
 ```
+
 If server shuts down before expiration of documents the documents remain undeleted.
 !!! Indexes are not deleted on sudden shutdown. 
 They will be deleted once the server starts up again. 
