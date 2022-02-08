@@ -10,7 +10,7 @@ index := mongo.IndexModel{
 `db.col.getIndexes()` will display it as: 
 ```
 {
-"v" : 2,
+	"v" : 2,
 	"key" : {
 		"expire" : 1
 	},
