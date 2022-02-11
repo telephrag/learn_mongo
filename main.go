@@ -60,6 +60,22 @@ func insertAndDisplay(collection *mongo.Collection) *[]models.Player { // insert
 		log.Panic(err)
 	}
 
+	idToUpdate := imr.InsertedIDs[0]
+	_, err = collection.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": idToUpdate},
+		bson.A{
+			bson.M{
+				"$set": bson.D{{
+					"name", bson.M{"$concat": bson.A{"[GBC]", "$name"}},
+				}},
+			},
+		},
+	)
+	if err != nil {
+		log.Panic(err)
+	}
+
 	return &documents
 }
 
@@ -102,6 +118,43 @@ func makeTTLIndex(collection *mongo.Collection) string {
 	return str
 }
 
+func iterateChangeStream(ctx context.Context, stream *mongo.ChangeStream, cancel context.CancelFunc) {
+	defer stream.Close(ctx)
+
+	for stream.Next(ctx) {
+		var event bson.M
+		err := stream.Decode(&event)
+		if err != nil {
+			log.Panic(err)
+		}
+		fmt.Println(event)
+	}
+}
+
+func watchEvents(collection *mongo.Collection) {
+
+	pipeline := mongo.Pipeline{
+		bson.D{{
+			"$match",
+			bson.D{{
+				"$or", bson.A{
+					bson.D{{"operationType", "insert"}},
+					bson.D{{"operationType", "delete"}},
+				},
+			}},
+		}},
+	}
+
+	stream, err := collection.Watch(context.TODO(), pipeline)
+	if err != nil {
+		log.Panic(err)
+	}
+	// defer stream.Close(context.TODO()) ???
+
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	go iterateChangeStream(ctx, stream, cancelFunc)
+}
+
 func main() {
 
 	clientOptions := options.Client().ApplyURI(
@@ -112,6 +165,7 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
+	defer client.Disconnect(context.TODO())
 
 	err = client.Ping(context.TODO(), nil)
 	if err != nil {
@@ -120,6 +174,8 @@ func main() {
 
 	// create collection and fill it with data with expiration times
 	collection := client.Database(config.DBName).Collection(config.CollectionName)
+
+	watchEvents(collection)
 
 	documents := insertAndDisplay(collection)
 	fmt.Println("Inserted documents:\n", documents)
