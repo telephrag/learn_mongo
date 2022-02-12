@@ -25,7 +25,7 @@ func iterateChangeStream(stream *mongo.ChangeStream, ctx context.Context, cancel
 			log.Panic("string expected")
 		}
 
-		handlerToEvent[opTypte](cancel)
+		handlerToEvent[opTypte](ctx, cancel)
 	}
 }
 

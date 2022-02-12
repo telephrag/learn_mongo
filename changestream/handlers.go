@@ -5,14 +5,14 @@ import (
 	"fmt"
 )
 
-var handlerToEvent = map[string]func(cancel context.CancelFunc){
-	"insert": func(cancel context.CancelFunc) {
+var handlerToEvent = map[string]func(ctx context.Context, cancel context.CancelFunc){
+	"insert": func(ctx context.Context, cancel context.CancelFunc) {
 		fmt.Println("insert handling...")
 	},
-	"delete": func(cancel context.CancelFunc) {
+	"delete": func(ctx context.Context, cancel context.CancelFunc) {
 		fmt.Println("delete handling...")
 	},
-	"invalidate": func(cancel context.CancelFunc) {
+	"invalidate": func(ctx context.Context, cancel context.CancelFunc) {
 		fmt.Println("invalidate handling...")
 		cancel()
 	},

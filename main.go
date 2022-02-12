@@ -65,17 +65,19 @@ func main() {
 		log.Panic(err)
 	}
 
+	// handling of operation do not occur if <-time.After() is used
+	timeout := time.After(10 * time.Second)
 	for {
 		select {
 		case <-ctx.Done():
 			fmt.Println("handled invalidation at shutdown")
 			return
-		case <-time.After(10 * time.Second):
+		case <-timeout:
 			fmt.Println("invalidation wasn't handled or didn't occur")
 			return
 		default:
-			time.Sleep(time.Millisecond * 500)
 		}
+		time.Sleep(time.Millisecond * 500)
 	}
 }
 
